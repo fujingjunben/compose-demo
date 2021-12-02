@@ -22,36 +22,46 @@ import com.example.compose_demo.data.NodeContent
 import kotlin.math.roundToInt
 
 
+@Preview
 @Composable
 fun MindMap() {
     val head = Node(mutableListOf(), NodeContent("head", "head"));
-    for (i in 0..4) {
+    for (i in 0..5) {
         head.children.add(Node(mutableListOf(), NodeContent("$i", "node$i")))
     }
-    Node(head)
-}
 
-@Composable
-fun Node(node: Node) {
-    Column {
-        node.children.map {
-            TextWithBorder(content = it.content.label)
+    val n = head.children.size
+    BoxWithConstraints {
+
+        head.children.forEachIndexed { index, child ->
+            DrawNode(
+                child.content.label,
+                start = DpOffset(0.dp, maxHeight / 2),
+                end = DpOffset(
+                    150.dp,
+                    maxHeight / 2 + 60.dp * (index - n / 2)
+                )
+            )
         }
     }
 }
 
 @Composable
-fun TextWithBorder(content: String) {
-    Text(
-        content,
-        modifier = Modifier
-            .padding(5.dp)
-            .border(
-                width = 2.dp,
-                color = Color.Green,
-                shape = CircleShape
+fun DrawNode(text: String, start: DpOffset, end: DpOffset) {
+    LineBetween(start = start, end = end)
+    NodeAt(offset = end, modifier = Modifier,
+        content = {
+            Text(
+                text = text,
+                modifier = Modifier
+                    .border(
+                        width = 2.dp,
+                        color = Color.Gray,
+                        shape = CircleShape
+                    )
+                    .padding(15.dp)
             )
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+        }
     )
 }
 
@@ -80,40 +90,6 @@ fun NodeAt(
     }
 }
 
-@Preview
-@Composable
-fun LineDemo1() {
-    BoxWithConstraints(
-        modifier = Modifier
-            .size(500.dp)
-    ) {
-        val width = maxWidth
-        val height = maxHeight
-
-        val start = DpOffset(0.dp, height / 2)
-        val end = DpOffset(start.x + 100.dp, start.y)
-
-        LineBetween(start = start, end = end)
-        NodeAt(offset = end, modifier = Modifier,
-            content = {
-                Text(
-                    text = "Hello World",
-                    modifier = Modifier
-                        .border(
-                            width = 2.dp,
-                            color = Color.Gray,
-                            shape = CircleShape
-                        )
-                        .padding(15.dp)
-                )
-            }
-        )
-
-
-    }
-
-
-}
 
 @Composable
 fun LineBetween(
