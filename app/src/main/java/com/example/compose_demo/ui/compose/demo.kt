@@ -1,28 +1,25 @@
 package com.example.compose_demo.ui.compose
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.compose_demo.data.Node
 import com.example.compose_demo.data.NodeContent
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -59,8 +56,8 @@ fun TextWithBorder(content: String) {
 }
 
 @Composable
-fun NodeWithPath(
-    start: Offset,
+fun NodeAt(
+    offset: DpOffset,
     modifier: Modifier,
     content: @Composable () -> Unit
 ) {
@@ -68,64 +65,66 @@ fun NodeWithPath(
         modifier = modifier,
         content = content
     ) { measurables, constraints ->
-        check(measurables.size == 2)
         val placeables = measurables.map {
             it.measure(constraints)
         }
 
-        val pathPlaceable = placeables[0]
-        val nodePlaceable = placeables[1]
+        val nodePlaceable = placeables[0]
 
         layout(constraints.maxWidth, constraints.maxHeight) {
-
+            nodePlaceable.placeRelative(
+                x = offset.x.toPx().roundToInt(),
+                y = offset.y.toPx().roundToInt() - nodePlaceable.height / 2
+            )
         }
     }
 }
 
 @Preview
 @Composable
-fun LineDemo() {
-    val size = 200.dp
-    val n = 5
-    val padding = size.div(n)
-
-    Box(
+fun LineDemo1() {
+    BoxWithConstraints(
         modifier = Modifier
             .size(500.dp)
-            .padding(top = padding.times(3))
     ) {
-        repeat(n + 1) {
-            val topPadding = padding.times(it)
-            NodeWithLine(
-                Modifier
-                    .padding(top = topPadding)
-                    .size(width = size, height = size - topPadding)
-            )
+        val width = maxWidth
+        val height = maxHeight
 
-            Box(
-                modifier = Modifier.offset(
-                    x = size, y = topPadding
-                )
-            ) {
+        val start = DpOffset(0.dp, height / 2)
+        val end = DpOffset(start.x + 100.dp, start.y)
+
+        LineBetween(start = start, end = end)
+        NodeAt(offset = end, modifier = Modifier,
+            content = {
                 Text(
-                    it.toString(),
+                    text = "Hello World",
                     modifier = Modifier
-                        .border(width = 2.dp, color = Color.Green)
-                        .padding(10.dp)
+                        .border(
+                            width = 2.dp,
+                            color = Color.Gray,
+                            shape = CircleShape
+                        )
+                        .padding(15.dp)
                 )
             }
-        }
+        )
+
+
     }
+
+
 }
 
 @Composable
-fun NodeWithLine(modifier: Modifier) {
+fun LineBetween(
+    start: DpOffset,
+    end: DpOffset,
+    modifier: Modifier = Modifier
+) {
     val path = Path()
     Canvas(
         modifier = modifier,
         onDraw = {
-            val width = size.width
-            val height = size.height
 
             drawPath(
                 path = path,
@@ -134,8 +133,7 @@ fun NodeWithLine(modifier: Modifier) {
             )
 
             path.reset()
-            path.moveTo(0f, height)
-            path.lineTo(width / 2, 0f)
-            path.lineTo(width, 0f)
+            path.moveTo(start.x.toPx(), start.y.toPx())
+            path.lineTo(end.x.toPx(), end.y.toPx())
         })
 }
