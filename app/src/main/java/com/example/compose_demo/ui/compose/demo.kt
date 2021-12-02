@@ -25,7 +25,6 @@ import com.example.compose_demo.data.Node
 import com.example.compose_demo.data.NodeContent
 
 
-@Preview
 @Composable
 fun MindMap() {
     val head = Node(mutableListOf(), NodeContent("head", "head"));
@@ -90,17 +89,31 @@ fun LineDemo() {
     val n = 5
     val padding = size.div(n)
 
-    repeat(n + 1) {
-        val topPadding = padding.times(it)
-        NodeWithLine(
-            Modifier
-                .padding(top = topPadding)
-                .size(width = size, height = size - topPadding)
-        )
+    Box(
+        modifier = Modifier
+            .size(500.dp)
+            .padding(top = padding.times(3))
+    ) {
+        repeat(n + 1) {
+            val topPadding = padding.times(it)
+            NodeWithLine(
+                Modifier
+                    .padding(top = topPadding)
+                    .size(width = size, height = size - topPadding)
+            )
 
-        Box(modifier = Modifier.offset(
-            x = size - 20.dp, y = topPadding)) {
-            Text(it.toString())
+            Box(
+                modifier = Modifier.offset(
+                    x = size, y = topPadding
+                )
+            ) {
+                Text(
+                    it.toString(),
+                    modifier = Modifier
+                        .border(width = 2.dp, color = Color.Green)
+                        .padding(10.dp)
+                )
+            }
         }
     }
 }
